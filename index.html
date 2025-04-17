@@ -99,3 +99,32 @@
 </body>
 </html>
 
+<div class="bg-slate-800 text-white rounded-2xl p-6 shadow-md mt-8">
+  <h2 class="text-xl font-bold text-purple-400 mb-4">Impressions by Creative</h2>
+  <ul id="creative-list" class="space-y-2 text-sm text-slate-300"></ul>
+</div>
+<script>
+  async function loadCreativeImpressions() {
+    const campaign = document.getElementById("campaign").value;
+    const url = `https://neuro-backend-production-feed.up.railway.app/creative-impressions${campaign ? `?campaign_id=${campaign}` : ""}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const list = document.getElementById("creative-list");
+    list.innerHTML = "";
+    data.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = `${item._id}: ${item.count} impressions`;
+      list.appendChild(li);
+    });
+  }
+
+  // Load creative data too
+  loadImpressions();
+  loadCreativeImpressions();
+
+  document.querySelector("button").addEventListener("click", () => {
+    loadImpressions();
+    loadCreativeImpressions();
+  });
+</script>
