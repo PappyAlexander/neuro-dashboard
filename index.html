@@ -1,11 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Neuro Dashboard</title>
-  </head>
-  <body>
-    <div id="root">Loading dashboard...</div>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neuro Attribution Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 40px;
+    }
+    h1 {
+      color: #38bdf8;
+      font-size: 2em;
+    }
+    .card {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .card h2 {
+      margin-top: 0;
+    }
+    .metric {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #34d399;
+    }
+  </style>
+</head>
+<body>
+  <h1>Neuro Attribution Dashboard</h1>
+
+  <div class="card">
+    <h2>Total Impressions</h2>
+    <div class="metric" id="impressionCount">Loading...</div>
+  </div>
+
+  <script>
+    async function fetchImpressions() {
+      const res = await fetch("https://neuro-backend-production-feed.up.railway.app/count");
+      const data = await res.json();
+      document.getElementById("impressionCount").innerText = data.count ?? 0;
+    }
+
+    fetchImpressions();
+  </script>
+</body>
 </html>
