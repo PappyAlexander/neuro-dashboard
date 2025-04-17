@@ -102,6 +102,7 @@
   <div class="card">
     <h2>Total Impressions</h2>
     <div class="count" id="impressionCount">Loading...</div>
+    <div id="latestTimestamp" style="font-size: 0.875rem; color: #94a3b8; margin-top: 10px;"></div>
   </div>
 
   <div class="creative-section">
@@ -120,8 +121,13 @@
 
       const response = await fetch(`https://neuro-backend-production-feed.up.railway.app/impressions?${params.toString()}`);
       const data = await response.json();
-      document.getElementById("impressionCount").innerText = data.count ?? 0;
-    }
+document.getElementById("impressionCount").innerText = data.count ?? 0;
+if (data.latest) {
+  const dt = new Date(data.latest).toLocaleString();
+  document.getElementById("latestTimestamp").innerText = `Last seen: ${dt}`;
+} else {
+  document.getElementById("latestTimestamp").innerText = "";
+  }
 
     async function loadCreativeImpressions() {
       const campaignId = document.getElementById("campaignInput").value;
