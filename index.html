@@ -50,6 +50,7 @@
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
       max-width: 600px;
+      margin-bottom: 40px;
     }
 
     .card h2 {
@@ -63,6 +64,25 @@
       color: #4ade80;
       font-weight: bold;
     }
+
+    .creative-list {
+      background-color: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 600px;
+    }
+
+    .creative-list h2 {
+      font-size: 1.2rem;
+      color: #a78bfa;
+      margin-bottom: 12px;
+    }
+
+    .creative-list ul {
+      list-style: none;
+      padding: 0;
+      color: #f1f5f9;
+    }
   </style>
 </head>
 <body>
@@ -71,12 +91,17 @@
   <div class="filters">
     <input type="text" id="campaignInput" placeholder="Campaign ID" />
     <input type="text" id="creativeInput" placeholder="Creative ID" />
-    <button onclick="fetchImpressions()">Filter</button>
+    <button onclick="runFilters()">Filter</button>
   </div>
 
   <div class="card">
     <h2>Total Impressions</h2>
     <div class="count" id="impressionCount">Loading...</div>
+  </div>
+
+  <div class="creative-list">
+    <h2>Impressions by Creative</h2>
+    <ul id="creative-list"></ul>
   </div>
 
   <script>
@@ -94,37 +119,30 @@
       document.getElementById("impressionCount").innerText = data.count ?? 0;
     }
 
-    fetchImpressions(); // load on page open
+    async function loadCreativeImpressions() {
+      const campaignId = document.getElementById("campaignInput").value;
+      let url = `https://neuro-backend-production-feed.up.railway.app/creative-impressions`;
+      if (campaignId) url += `?campaign_id=${campaignId}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const list = document.getElementById("creative-list");
+      list.innerHTML = "";
+      data.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = `${item._id}: ${item.count} impressions`;
+        list.appendChild(li);
+      });
+    }
+
+    function runFilters() {
+      fetchImpressions();
+      loadCreativeImpressions();
+    }
+
+    // Load on page load
+    runFilters();
   </script>
 </body>
 </html>
-
-<div class="bg-slate-800 text-white rounded-2xl p-6 shadow-md mt-8">
-  <h2 class="text-xl font-bold text-purple-400 mb-4">Impressions by Creative</h2>
-  <ul id="creative-list" class="space-y-2 text-sm text-slate-300"></ul>
-</div>
-<script>
-  async function loadCreativeImpressions() {
-    const campaign = document.getElementById("campaign").value;
-    const url = `https://neuro-backend-production-feed.up.railway.app/creative-impressions${campaign ? `?campaign_id=${campaign}` : ""}`;
-    const res = await fetch(url);
-    const data = await res.json();
-
-    const list = document.getElementById("creative-list");
-    list.innerHTML = "";
-    data.forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = `${item._id}: ${item.count} impressions`;
-      list.appendChild(li);
-    });
-  }
-
-  // Load creative data too
-  loadImpressions();
-  loadCreativeImpressions();
-
-  document.querySelector("button").addEventListener("click", () => {
-    loadImpressions();
-    loadCreativeImpressions();
-  });
-</script>
