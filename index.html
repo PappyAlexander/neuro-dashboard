@@ -27,4 +27,147 @@
     }
 
     .filters input {
-      padding: 10px
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background-color: #1e293b;
+      color: white;
+    }
+
+    .filters button {
+      padding: 10px 20px;
+      background-color: #38bdf8;
+      color: #0f172a;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .card {
+      background-color: #1e293b;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      max-width: 600px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      color: #facc15;
+    }
+
+    .count {
+      font-size: 3rem;
+      color: #4ade80;
+      font-weight: bold;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      color: #c084fc;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin: 0;
+    }
+
+    li {
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    #latestTimestamp {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Neuro Attribution Dashboard</h1>
+
+  <div class="filters">
+    <input type="text" id="campaignInput" placeholder="Campaign ID" />
+    <input type="text" id="creativeInput" placeholder="Creative ID" />
+    <button id="filterBtn">Filter</button>
+  </div>
+
+  <div class="card">
+    <h2>Total Impressions</h2>
+    <div class="count" id="impressionCount">Loading...</div>
+    <div id="latestTimestamp"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Impressions by Creative</div>
+    <ul id="creative-list"></ul>
+  </div>
+
+  <script>
+    async function fetchImpressions() {
+      const campaignId = document.getElementById("campaignInput").value;
+      const creativeId = document.getElementById("creativeInput").value;
+
+      const url = new URL("https://neuro-backend-production-feed.up.railway.app/impressions");
+      if (campaignId) url.searchParams.append("campaign_id", campaignId);
+      if (creativeId) url.searchParams.append("creative_id", creativeId);
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        document.getElementById("impressionCount").innerText = data.count ?? 0;
+
+        if (data.latest) {
+          const dt = new Date(data.latest).toLocaleString();
+          document.getElementById("latestTimestamp").innerText = `Last seen: ${dt}`;
+        } else {
+          document.getElementById("latestTimestamp").innerText = "";
+        }
+      } catch (err) {
+        document.getElementById("impressionCount").innerText = "Error";
+        document.getElementById("latestTimestamp").innerText = "";
+      }
+    }
+
+    async function fetchCreativeBreakdown() {
+      const campaignId = document.getElementById("campaignInput").value;
+      const url = new URL("https://neuro-backend-production-feed.up.railway.app/creative-impressions");
+      if (campaignId) url.searchParams.append("campaign_id", campaignId);
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const list = document.getElementById("creative-list");
+        list.innerHTML = "";
+
+        data
+          .sort((a, b) => b.count - a.count)
+          .forEach(item => {
+            const li = document.createElement("li");
+            li.textContent = `${item._id}: ${item.count} impressions`;
+            list.appendChild(li);
+          });
+      } catch (err) {
+        document.getElementById("creative-list").innerHTML = "<li>Error loading data</li>";
+      }
+    }
+
+    function loadData() {
+      fetchImpressions();
+      fetchCreativeBreakdown();
+    }
+
+    document.getElementById("filterBtn").addEventListener("click", loadData);
+
+    // Load data on page load
+    window.onload = loadData;
+  </script>
+</body>
+</html>
