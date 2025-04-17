@@ -134,11 +134,14 @@
       const list = document.getElementById("creative-list");
       list.innerHTML = "";
 
-      data.forEach(item => {
-        const li = document.createElement("li");
-        li.textContent = `${item._id}: ${item.count} impressions`;
-        list.appendChild(li);
-      });
+     data
+  .sort((a, b) => b.count - a.count)
+  .forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = `${item._id}: ${item.count} impressions`;
+    list.appendChild(li);
+  });
+
     }
 
     function refreshDashboard() {
